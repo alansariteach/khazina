@@ -1,326 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0f17">
-<title>CIPHERVAULT | وصول آمن</title>
-<meta name="description" content="CIPHERVAULT — خزنة كلمات مرور مشفرة محلياً. بياناتك لا تغادر جهازك.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="CIPHERVAULT | وصول آمن">
-<meta property="og:description" content="خزنة كلمات مرور مشفرة محلياً (AES-256). بياناتك لا تغادر جهازك.">
-<meta property="og:image" content="https://alansariteach.github.io/khazina/khazina-og.png">
-<meta name="twitter:card" content="summary_large_image">
-<style>
-*{margin:0;box-sizing:border-box}
-html,body{height:100%;min-height:100vh}
-body{background:#0a0f17;color:#e6ecf6;font-family:'Segoe UI',Tahoma,sans-serif;line-height:1.65;
- background:
-  radial-gradient(circle at 82% 10%,#0e2547 0%,transparent 55%),
-  radial-gradient(circle at 12% 92%,#0c2245 0%,transparent 60%),
-  #0a0f17;}
-.head{position:sticky;top:0;background:#0c1420;border-bottom:1px solid #1d2b42;padding:10px 14px;display:flex;align-items:center;gap:10px}
-.head .lg{width:34px;height:34px;border-radius:9px;background:#123;background:#101b30;border:1px solid #2a3f63;display:grid;place-items:center;font-size:1rem}
-.head b{color:#dbe6f5;font-size:.95rem}
-.head .md{display:inline;color:#5f7594}
-.wrap{max-width:600px;margin:0 auto;padding:16px}
-.card{background:#0f1830;border:1px solid #223455;border-radius:14px;padding:20px;box-shadow:0 18px 44px rgba(0,0,0,.5)}
-.warn{border:1px solid #ff5a56aa;background:linear-gradient(135deg,#3a1016,#261018);color:#ffd9d4;border-radius:10px;padding:10px 14px;font-size:.85rem;font-weight:700;box-shadow:0 0 22px rgba(255,45,45,.15)}
-label{display:block;color:#9fb4d0;font-size:.82rem;font-weight:600;margin:10px 0 6px}
-input{width:100%;background:#0b1626;border:1px solid #2c4268;border-radius:9px;padding:12px;color:#e9f1fc;font-size:1rem;outline:none;letter-spacing:1px}
-input:focus{border-color:#37d4c0;box-shadow:0 0 0 1px #37d4c077}
-.btn{width:100%;background:linear-gradient(135deg,#0bbf9e,#0a8fd0);border:none;border-radius:11px;padding:13px;color:#03121c;font-weight:800;font-size:1rem;cursor:pointer;margin-top:12px}
-.btn:active{transform:scale(.98)}
-.sec{display:flex;justify-content:center;gap:12px;margin-top:14px;color:#7e93b1;font-size:.76rem}
-.tip{background:#0e1c34;border:1px dashed #2c4268;border-radius:9px;padding:11px 13px;color:#93a8c6;font-size:.8rem;margin-top:12px;line-height:1.6}
-.err{color:#ff6a5e;font-weight:700;min-height:18px;margin-top:6px;font-size:.9rem}
-.screen{text-align:center;margin-top:2px}
-.screen h1{font-size:1.5rem;font-weight:900;color:#fff;margin:14px 0 2px;letter-spacing:.5px}
-.screen p{color:#8ba0bf;font-size:.9rem;margin:4px 0}
-.warnline{color:#ff5a56;font-size:.83rem;font-weight:700}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#0e1c34;border:1px solid #223455;border-radius:11px;padding:8px 12px;margin-bottom:12px}
-.toolbar input{flex:1;min-width:96px;padding:9px}
-.t{display:inline-block;margin:0;padding:5px 10px;background:transparent;border:none;color:#3fc6f0;font-weight:700;font-size:.85rem;cursor:pointer}
-.entry{display:flex;align-items:center;border:1px solid #223455;border-radius:11px;padding:11px 13px;margin-bottom:8px;background:#0f1830;cursor:pointer}
-.entry .ic{width:36px;height:36px;border-radius:9px;background:#12203a;color:#3fc6f0;display:grid;place-items:center;font-weight:800}
-.entry .tx{flex:1;min-width:0}.entry .tx b{display:block;color:#e6ecf6}.entry .tx small{color:#7e93b1}
-.cp{background:none;border:1px solid #223455;border-radius:8px;color:#3fc6f0;padding:6px 10px;font-size:.85rem;cursor:pointer}
-.empty{color:#7e93b1;text-align:center;padding:18px}
-.mask{position:fixed;inset:0;background:rgba(4,8,14,.6);display:none;align-items:center;justify-content:center;z-index:40}
-.mask .box{background:#101b30;border:1px solid #223455;border-radius:16px;width:94%;max-width:520px;max-height:90%;overflow:auto;padding:18px}
-.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.locked{background:#24060a;border:2px solid #ff5a56;border-radius:15px;padding:20px;text-align:center}
-.toast{position:fixed;bottom:18px;inset-inline:0;background:rgba(10,26,46,.94);color:#fff;border-radius:11px;padding:10px 18px;display:none;max-width:380px;z-index:99;margin:0 auto;text-align:center}
-@media(max-width:520px){.f2{grid-template-columns:1fr;padding:6px}}
-</style>
-</head>
-<body>
-<header class="head"><span class="lg">🔐</span><b>CIPHERVAULT</b><span class="md" id="mstat">— وصول آمن</span></header>
-<div class="wrap" id="app"></div>
-<div class="toast" id="toast"></div>
-<script>
-(function(){
-'use strict';
-var enc=new TextEncoder(), dec=new TextDecoder();
-function b64(b){return btoa(String.fromCharCode.apply(null,new Uint8Array(b)));}
-function ub64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0);});}
-var K='khazina_vault', LK='khazina_lock', MK='khazina_mastercfg';
-var ITER=600000;
-var mem={key:null, kind:null, entries:[], attempts:0, lockUntil:0};
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#030303" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="CipherVault — خزنة محلية مشفرة." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://manus-analytics.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.pwnedpasswords.com https://manus-analytics.com; worker-src 'self'; frame-src 'self'; form-action 'self'; media-src 'none'; manifest-src 'self'" />
+    <meta name="referrer" content="no-referrer" />
+    <title>CIPHERVAULT | Secure Access</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="password-visibility.css" />
+    <link rel="stylesheet" href="language.css?v=20260930-0941" />
+    <link rel="stylesheet" href="local-vault.css" />
+    <link rel="stylesheet" href="biometric.css?v=20260930-1540" />
+    <link rel="stylesheet" href="responsive.css?v=20260930-1516" />
+  <meta property="og:type" content="website">
+		<meta property="og:url" content="https://khazina.manus.space/index.html">
+		<meta property="og:title" content="CIPHERVAULT | Secure Access">
+		<meta property="og:description" content="CipherVault — خزنة محلية مشفرة.">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="CIPHERVAULT | Secure Access">
+		<meta name="twitter:description" content="CipherVault — خزنة محلية مشفرة."><link rel="canonical" href="https://khazina.manus.space/index.html" /></head>
+  <body class="redlock-page" data-page-title="indexTitle">
+    <div id="binary-rain" class="binary-rain" aria-hidden="true"></div>
+    <div class="noise-layer" aria-hidden="true"></div>
 
-function el(s){return document.getElementById(s);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function toast(m){var t=el('toast');t.textContent=m;t.style.display='block';window.clearTimeout(toast._t);toast._t=window.setTimeout(function(){t.style.display='none';},1700);}
-function setStat(s){el('mstat').textContent=' — '+s;}
-function screen(h){el('app').innerHTML=h;}
-function readLock(){try{return JSON.parse(localStorage.getItem(LK)||'null');}catch(e){return null;}}
-function saveLock(o){try{localStorage.setItem(LK,JSON.stringify(o));}catch(e){}}
+    <header class="site-header">
+      <div class="header-actions"><button id="menu-toggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="contact-panel" aria-label="فتح القائمة" data-i18n-aria-label="menuOpen"><span></span><span></span><span></span></button></div>
+      <a class="header-alansari" href="#main-content" aria-label="Alansari.Tech"><img src="assets/alansari-tech-logo.png" alt="Alansari.Tech" /></a>
+    </header>
 
-function deriveBits(pw,salt){
-  var key=crypto.subtle.importKey('raw',enc.encode(pw),{name:'PBKDF2'},false,['deriveBits']);
-  return key.then(function(k){
-    return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:ub64(salt),iterations:ITER},k,256);
-  });
-}
-function aesk(raw){return crypto.subtle.importKey('raw',raw,{name:'AES-GCM',length:256},true,['encrypt','decrypt']);}
-function E(key,plain){
-  var iv=crypto.getRandomValues(new Uint8Array(12));
-  return aesk(key).then(function(k){return crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,enc.encode(plain));})
-    .then(function(ct){return {iv:b64(iv),ct:b64(ct)};});
-}
-function D(key,blob){
-  return aesk(key).then(function(k){return crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(blob.iv)},k,ub64(blob.ct));})
-    .then(function(pt){return dec.decode(pt);});
-}
-function sha1hex(t){
-  return crypto.subtle.digest('SHA-1',enc.encode(t)).then(function(d){
-    return Array.prototype.map.call(new Uint8Array(d),function(x){return ('0'+x.toString(16)).slice(-2);}).join('');
-  });
-}
+    <aside id="contact-panel" class="contact-panel" aria-hidden="true">
+      <div class="contact-panel__top"><p>CHANNEL / 01</p><button id="menu-close" type="button" aria-label="إغلاق القائمة" data-i18n-aria-label="menuClose">×</button></div>
+      <div class="contact-panel__content">
+        <span class="contact-pulse" aria-hidden="true"></span>
+        <h2 data-i18n="contactTitle">تواصل معنا</h2>
+        <p data-i18n="contactCopy">للاستفسارات والدعم، تواصل مباشرة عبر Telegram وInstagram.</p>
+        <div class="contact-links">
+          <a class="telegram-link contact-link" href="https://t.me/alansari_tech" target="_blank" rel="noopener noreferrer"><span>TELEGRAM</span><b>@alansari_tech</b><i aria-hidden="true">↗</i></a>
+          <a class="telegram-link contact-link" href="https://www.instagram.com/alansari.tech?stkn=c2JhdG1zbTYzdm4z" target="_blank" rel="noopener noreferrer"><span>INSTAGRAM</span><b>@alansari.tech</b><i aria-hidden="true">↗</i></a>
+        </div>
+        <button class="contact-install-action" data-install-app type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="installApp">تثبيت التطبيق</span><b>↓</b></button>
+        <button class="contact-language-toggle" data-language-toggle type="button" aria-label="Switch to English"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M4 12h16M12 4c2.2 2.2 3.3 4.9 3.3 8S14.2 17.8 12 20M12 4C9.8 6.2 8.7 8.9 8.7 12s1.1 5.8 3.3 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span data-i18n="languageMenu">التحويل الى الانجليزية</span><b data-language-toggle-label>EN</b></button>
+      </div>
+    </aside>
+    <div id="menu-scrim" class="menu-scrim" aria-hidden="true"></div>
 
-function home(){
-  var now=Date.now();
-  if(mem.lockUntil>now){
-    setStat('مقفل');
-    var mins=Math.max(1,Math.ceil((mem.lockUntil-now)/60000));
-    screen('<div class="screen"><div style="font-size:40px">🔒</div><h1>مقفل مؤقتاً</h1>'+
-      '<div class="card locked"><p>ثلاث محاولات خاطئة للرمز الرئيسي</p>'+
-      '<p>الخزنة مقفلة لمدة <b>'+mins+' دقيقة</b>.</p></div></div>');
-    window.setTimeout(home,30000);
-    return;
-  }
-  if(!mem.key){setup(mem.cfg?'open':'create');return;}
-  setStat('مفتوح');
-  var q=(el('q')?el('q').value:'').toLowerCase();
-  var lst=mem.entries.filter(function(e){
-    if(!q)return true;
-    return (e.n||'').toLowerCase().indexOf(q)>-1 || (e.u||'').toLowerCase().indexOf(q)>-1 || (e.r||'').toLowerCase().indexOf(q)>-1;
-  });
-  var html='<div class="toolbar"><input id="q" placeholder="بحث بالاسم أو المستخدم أو الرابط" value="'+esc(q)+'" onkeyup="vaultApp.re()" >'+
-    '<button class="t" onclick="vaultApp.add()">＋</button><button class="t" onclick="vaultApp.export1()">تصدير</button>'+
-    '<button class="t" onclick="vaultApp.import1()">استيراد</button><button class="t" onclick="vaultApp.lock()">قفل 🔒</button></div>'+
-    '<div class="card" style="padding:14px 12px">'+
-    (lst.length?lst.map(function(e){var i=mem.entries.indexOf(e);
-      return '<div class="entry" onclick="vaultApp.edit('+i+')"><span class="ic">'+esc(e.n.trim().charAt(0)||'؟')+'</span>'+
-        '<span class="tx"><b>'+esc(e.n)+'</b><small>'+esc((e.u||'')+' · '+((e.r||'').replace(/^https?:\/\//,'')))+'</small></span>'+
-        '<button class="cp" onclick="event.stopPropagation();vaultApp.copy('+i+')">نسخ</button></div>';}).join('')
-      :'<div class="empty">لا حسابات — اضغط (＋) لإضافة حساب</div>')+
-    '</div>';
-  screen(html);
-}
-var vaultApp={
-  re:function(){vaultApp._q=el('q').value;home();},
-  add:function(){vaultApp._e=null;vaultApp.openModal();},
-  edit:function(i){vaultApp._e=mem.entries[i];vaultApp.openModal();},
-  openModal:function(){
-    var e=vaultApp._e||{n:'',u:'',r:'',p:'',notes:'',id:Date.now()};
-    var m=el('modal')||document.body.appendChild(document.createElement('div'));
-    m.className='mask';m.id='modal';m.style.display='flex';
-    m.innerHTML='<div class="box"><h3 style="margin:0 0 10px;color:#e6ecf6">'+(vaultApp._e?'تعديل حساب':'حساب جديد')+'</h3>'+
-     '<div class="f2">'+
-       '<label>الموقع / التطبيق<input id="fn" value="'+esc(e.n)+'"></label>'+
-       '<label>الرابط<input id="fr" value="'+esc(e.r)+'" placeholder="https://..."></label>'+
-       '<label>اسم المستخدم<input id="fu" value="'+esc(e.u)+'"></label>'+
-       '<label>كلمة المرور<input id="fp" value="'+esc(e.p)+'" style="direction:ltr"></label>'+
-     '</div>'+
-     '<label>ملاحظات<input id="fnotes" value="'+esc(e.notes)+'"></label>'+
-     '<div style="display:flex;gap:8px;align-items:center;margin-top:12px">'+
-       '<button type="button" class="t" onclick="vaultApp.gen()">مولّد</button>'+
-       '<button type="button" class="t" onclick="vaultApp.leak()">فحص تسريب</button>'+
-       '<span id="leakres" style="font-size:.8rem;color:#9fb4d0"></span></div>'+
-     '<div style="display:flex;gap:10px;margin-top:14px">'+
-       '<button class="btn" style="background:#1b2b4a;color:#e6ecf6" onclick="vaultApp.closeM()">إلغاء</button>'+
-       '<button class="btn" onclick="vaultApp.save()">حفظ</button></div>'+
-     (vaultApp._e?'<button class="btn" style="background:linear-gradient(135deg,#9c1f2e,#5c1018);margin-top:8px" onclick="vaultApp.del()">حذف الحساب</button>':'')+
-     '</div>';
-  },
-  closeM:function(){var m=el('modal');if(m){m.style.display='none';}},
-  save:function(){
-    var e={n:el('fn').value,u:el('fu').value,r:el('fr').value,p:el('fp').value,notes:el('fnotes').value};
-    if(!e.n){toast('اكتب اسم الموقع');return;}
-    if(vaultApp._e){e.id=vaultApp._e.id;var i=mem.entries.indexOf(vaultApp._e);mem.entries[i]=e;}
-    else{e.id=Date.now();mem.entries.push(e);}
-    persist();vaultApp.closeM();home();
-  },
-  del:function(){
-    if(vaultApp._e){mem.entries=mem.entries.filter(function(x){return x!==vaultApp._e;});persist();}
-    vaultApp.closeM();home();
-  },
-  copy:function(i){
-    (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(mem.entries[i].p):Promise.resolve())
-      .then(function(){toast('تم نسخ كلمة المرور');}).catch(function(){toast('تعذر النسخ');});
-  },
-  gen:function(){
-    var c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*-_=+';
-    var r=crypto.getRandomValues(new Uint8Array(18)),s='';
-    for(var i=0;i<18;i++)s+=c[r[i]%c.length];
-    el('fp').value=s;toast('كلمة مرور قوية مولّدة');
-  },
-  leak:function(){
-    var p=el('fp').value,res=el('leakres');
-    if(!p){res.textContent='اكتب كلمة المرور أولاً';return;}
-    res.textContent='جارٍ الفحص…';
-    sha1hex(p).then(function(h){
-      var pre=h.slice(0,5).toUpperCase(),suf=h.slice(5).toUpperCase();
-      devfetch('https://api.pwnedpasswords.com/range/'+pre).then(function(t){
-        var cnt=0;t.split(/\r?\n/).forEach(function(ln){var x=ln.split(':');if(x[0].toUpperCase()===suf)cnt=parseInt(x[1],10);});
-        res.textContent=cnt>0?('مسرّب '+cnt+' مرة — غيّرها'):'آمنة — ما انسربت';
-      }).catch(function(){res.textContent='تعذر الفحص (الانترنت)';});
-    });
-  },
-  lock:function(){lockNow();},
-  export1:function(){
-    persist().then(function(){
-      var raw='CIPHERVAULT\n'+vaultB64;
-      var a=document.createElement('a');
-      a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(raw);
-      a.download='khazina-backup-'+new Date().toISOString().slice(0,10)+'.txt';
-      a.click();toast('تم تصدير النسخة (مشفرة)');
-    });
-  },
-  import1:function(){
-    var i=document.createElement('input');i.type='file';i.accept='.txt,text/plain';
-    i.onchange=function(){
-      var f=i.files[0];if(!f)return;
-      var r=new FileReader();
-      r.onload=function(){
-        try{
-          var lines=String(r.result).split('\n');
-          if(lines[0]!=='CIPHERVAULT'||!lines[1])throw 0;
-          var blob=JSON.parse(lines.slice(1).join('\n'));
-          mem.entries=blob.entries;
-          persist().then(function(){toast('تم الاستيراد');});
-        }catch(e){toast('ملف غير صالح');}
-      };
-      r.readAsText(f,'UTF-8');
-    };
-    i.click();
-  }
-};
-var vaultB64='';
-function persist(){
-  var blob={v:1,entries:mem.entries};
-  return E(mem.key,JSON.stringify(blob)).then(function(en){return {en:en};}).then(function(r){
-    vaultB64=btoa(JSON.stringify(r.en));
-    localStorage.setItem(K,vaultB64);
-    localStorage.setItem(MK,btoa(JSON.stringify(mem.cfg)));
-    return null;
-  });
-}
-function devfetch(url){
-  return fetch(url).then(function(r){return r.text();});
-}
+    <main id="main-content" class="access-main">
+      <section class="access-core" aria-labelledby="site-name">
+        <p id="access-code" class="access-code">LOCAL VAULT · DEVICE_01</p>
+        <div class="hero-biohazard"><img src="assets/personal-biohazard-mark.png" alt="الشعار الشخصي" data-i18n-alt="personalMark" /></div>
+        <div class="signal-rule" aria-hidden="true"><span></span><i></i><span></span></div>
+        <h1 id="site-name">CIPHERVAULT</h1>
+        <p id="access-mode-note" class="access-mode-note" data-i18n="loadingVault">جار تجهيز الخزنة المحلية…</p>
 
-function init(){
-  var now=Date.now();
-  try{var lk=readLock();if(lk&&lk.until&&lk.until>now)mem.lockUntil=lk.until;}catch(e){}
-  var cfgRaw=null;try{cfgRaw=localStorage.getItem(MK);}catch(e){}
-  if(!cfgRaw){setup('create');return;}
-  try{mem.cfg=JSON.parse(atob(cfgRaw));}catch(e){setup('create');return;}
-  home();
-}
+        <form id="unlock-form" class="unlock-form" novalidate hidden>
+          <label for="master-password"><span id="master-label" data-i18n="masterPassword">كلمة المرور الرئيسية</span></label>
+          <div class="password-control">
+            <input id="master-password" type="password" autocomplete="current-password" maxlength="256" autocapitalize="off" spellcheck="false" placeholder="أدخل الرمز الرئيسي" data-i18n-placeholder="masterPlaceholder" aria-describedby="form-state" />
+            <button id="visibility-toggle" type="button" class="visibility-toggle" aria-label="إظهار الرمز الرئيسي" data-i18n-aria-label="showMaster" aria-pressed="false"><svg class="eye-open" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M2.4 12s3.4-5.5 9.6-5.5S21.6 12 21.6 12 18.2 17.5 12 17.5 2.4 12 2.4 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg><svg class="eye-closed" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M9.8 6.8A9.8 9.8 0 0 1 12 6.5c6.2 0 9.6 5.5 9.6 5.5a18.7 18.7 0 0 1-3 3.5M14.4 16.9A9.7 9.7 0 0 1 12 17.5C5.8 17.5 2.4 12 2.4 12a18.2 18.2 0 0 1 3.2-3.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9.8 9.8a3.1 3.1 0 0 0 4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+          </div>
+          <div id="confirm-field" class="setup-field" hidden>
+            <label for="confirm-password"><span data-i18n="confirmMaster">تأكيد كلمة المرور الرئيسية</span></label>
+            <div class="password-control"><input id="confirm-password" type="password" autocomplete="new-password" maxlength="256" autocapitalize="off" spellcheck="false" placeholder="أعد إدخال كلمة المرور" data-i18n-placeholder="confirmPlaceholder" /><button id="confirm-visibility-toggle" type="button" class="visibility-toggle" aria-label="إظهار كلمة المرور" data-i18n-aria-label="showPassword" aria-pressed="false"><svg class="eye-open" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M2.4 12s3.4-5.5 9.6-5.5S21.6 12 21.6 12 18.2 17.5 12 17.5 2.4 12 2.4 12Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg><svg class="eye-closed" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M9.8 6.8A9.8 9.8 0 0 1 12 6.5c6.2 0 9.6 5.5 9.6 5.5a18.7 18.7 0 0 1-3 3.5M14.4 16.9A9.7 9.7 0 0 1 12 17.5C5.8 17.5 2.4 12 2.4 12a18.2 18.2 0 0 1 3.2-3.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9.8 9.8a3.1 3.1 0 0 0 4.4 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+          </div>
+          <p id="form-state" class="form-state" aria-live="polite"></p>
+          <button id="unlock-button" class="unlock-button" type="submit"><span id="unlock-label" data-i18n="openVault">فتح الخزنة</span><i aria-hidden="true">↵</i></button>
+          <button id="biometric-unlock" class="biometric-unlock" type="button" hidden><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.2 12.8c0-3 1.6-5.1 3.8-5.1s3.8 2.1 3.8 5.1c0 3.1-1.2 6.1-3.8 8.2M5.8 13.5C5.8 8.9 8.3 5.8 12 5.8s6.2 3.1 6.2 7.7c0 3.1-.9 6.1-2.8 8.5M3.5 14.2C3.5 8 7 3.5 12 3.5s8.5 4.5 8.5 10.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 12.5v.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span data-i18n="biometricUnlock">فتح بالبصمة</span></button>
+          <p id="biometric-unlock-note" class="biometric-unlock-note" hidden data-i18n="biometricUnlockHint">متاح على هذا الجهاز بعد التفعيل بكلمة المرور الرئيسية.</p>
+        </form>
 
-function setup(kind){
-  mem.kind=kind||'create';
-  setStat(mem.kind==='create'?'إنشاء الخزنة':'فتح الخزنة');
-  var creating=(mem.kind==='create');
-  var html='<div class="screen">'+
-   '<div class="card" style="text-align:center">'+
-     '<div class="warn">⚠️ منطقة محمية — خزنة مشفرة AES-256</div>'+
-     '<h1>'+(creating?'أنشئ الخزنة':'افتح الخزنة')+'</h1>'+
-     '<p>'+(creating?'أنشئ كلمة مرور رئيسية من 12 حرفاً على الأقل. لا يمكن استعادتها إذا نسيتها.':'أدخل رمزك الرئيسي للمتابعة.')+'</p>'+
-     (creating?'':'<p style="font-size:.85rem;color:#7e93b1" id="attempts"></p>')+
-     '<label>كلمة المرور الرئيسية</label><input type="password" id="mp" placeholder="••••••••••••" autocomplete="off">'+
-     (creating?'<label>تأكيد كلمة المرور</label><input type="password" id="mp2" placeholder="أعد إدخال كلمة المرور" autocomplete="off">':'')+
-     '<p class="err" id="err"></p>'+
-     '<button class="btn" onclick="vaultApp.submit()">'+(creating?'إنشاء الخزنة':'فتح الخزنة')+'</button>'+
-     '<div class="sec"><span>AES-256 · محلي فقط</span><span>٣ محاولات كحد أقصى</span></div>'+
-     '<div class="tip">بياناتك مشفرة محلياً على هذا الجهاز.<br>بعد 3 محاولات خاطئة يُقفل. <b>لا يمكن استرجاع كلمة المرور</b> — احفظها جيداً.</div>'+
-   '</div></div>';
-  screen(html);
-}
+        <p id="security-description" class="security-description" data-i18n="securityDescription">تظل بياناتك مشفرة محليا على هذا الجهاز. بعد 3 محاولات خاطئة يقفل.</p>
+        <div class="security-meta"><span data-i18n="localOnly">AES-256 / محلي فقط</span><b></b><span data-i18n="attemptsMax">٣ محاولات كحد أقصى</span></div>
+      </section>
+    </main>
 
-vaultApp.submit=function(){
-  var creating=(mem.kind==='create');
-  var p=el('mp').value,err=el('err');
-  if(!p){err.textContent='أدخل كلمة المرور';return;}
-  if(creating){
-    if(p.length<12){err.textContent='كلمة المرور قصيرة — الأقل 12 حرفاً';return;}
-    if(p!==el('mp2').value){err.textContent='كلمتا المرور غير متطابقتين';return;}
-    var salt=randomB64(16);
-    deriveBits(p,salt).then(function(bits){
-      var key=new Uint8Array(bits);
-      mem.key=key;
-      E(key,'VERIFY').then(function(ver){
-        mem.cfg={salt:salt,it:ITER,ver:ver};
-        mem.entries=[];mem.kind='open';
-        persist().then(function(){toast('تم إنشاء الخزنة');home();});
-      });
-    }).catch(function(){err.textContent='تعذر التشفير على هذا المتصفح';});
-    return;
-  }
-  // unlock
-  deriveBits(p,mem.cfg.salt).then(function(bits){
-    var key=new Uint8Array(bits);
-    D(key,mem.cfg.ver).then(function(v){
-      if(v!=='VERIFY')throw 0;
-      mem.key=key;mem.kind='open';
-      localStorage.setItem(LK,JSON.stringify({until:0,attempts:0}));
-      mem.lockUntil=0;
-      var raw=null;try{raw=localStorage.getItem(K);}catch(e){}
-      if(raw){
-        D(key,JSON.parse(atob(raw))).then(function(dec){
-          try{mem.entries=JSON.parse(dec).entries||[];}catch(e){mem.entries=[];}
-          home();
-        }).catch(function(){mem.entries=[];home();});
-      }else{home();}
-    }).catch(function(){failAttempt();});
-  }).catch(function(){failAttempt();});
-};
-
-function failAttempt(){
-  var err=el('err');
-  var lk=readLock()||{until:0,attempts:0};
-  lk.attempts=(lk.attempts||0)+1;
-  if(lk.attempts>=3){lk.until=Date.now()+15*60000;lk.attempts=0;mem.lockUntil=lk.until;}
-  saveLock(lk);
-  if(mem.lockUntil>0){err.textContent='3 محاولات خاطئة — مقفل 15 دقيقة';home();}
-  else{err.textContent='كلمة مرور غير صحيحة — المحاولة '+(lk.attempts||1)+' من 3';
-    el('mp').value='';el('mp').focus();}
-}
-function randomB64(len){
-  var b=crypto.getRandomValues(new Uint8Array(len));
-  return btoa(String.fromCharCode.apply(null,b));
-}
-function lockNow(){
-  mem.key=null;mem.kind=null;
-  setStat('مقفل');
-  home();
-}
-
-window.vaultApp=vaultApp;
-init();
-})();
-</script>
-</body>
+    <footer class="site-footer"><span>© <span id="year"></span> CIPHERVAULT</span><span class="footer-meta">LOCAL ENCRYPTED VAULT</span><span class="made-by" data-i18n="madeBy">صنع بواسطة Alansari.Tech</span></footer>
+    <div id="vault-host" hidden><iframe id="vault-frame" class="vault-frame" title="CipherVault" src="vault.html?embedded=1"></iframe></div>
+    <div id="install-guide" class="install-guide" role="dialog" aria-modal="true" aria-labelledby="install-guide-title" hidden><div class="install-guide__card"><div class="install-guide__top"><h2 id="install-guide-title" data-i18n="installGuideTitle">تثبيت CipherVault</h2><button id="install-guide-close" class="install-guide__close" type="button" aria-label="إغلاق" data-i18n-aria-label="menuClose">×</button></div><p data-i18n="installGuideIntro">على iPhone، افتح هذا الموقع في Safari ثم اتبع الخطوات التالية:</p><ol data-i18n-html="installGuideSteps"><li>اضغط زر المشاركة Share.</li><li>اختر Add to Home Screen.</li><li>اضغط Add لتثبيت CipherVault.</li></ol></div></div>
+    <script src="crypto-vault.js?v=20260930-1540"></script>
+    <script src="vault-store.js?v=20260930-1540"></script>
+    <script src="language.js?v=20260930-1540"></script>
+    <script src="pwa.js"></script>
+    <script src="biometric-vault.js?v=20260930-1540"></script>
+    <script src="app.js?v=20260930-1540"></script>
+  <script
+			defer
+			data-domain="manus.space"
+			src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
+		></script>
+		<script>
+			window.plausible =
+				window.plausible ||
+				function () {
+					(window.plausible.q = window.plausible.q || []).push(arguments);
+				};
+			plausible('custom-pageview', {
+			  props: {
+    			domain: window.location.host
+  			}
+			})
+		</script><script defer nonce="da5ee286-ca9d-4e8f-be40-715fe2fc36d3" src="https://manus-analytics.com/script.js" data-website-id="2771021b-17af-46b4-843b-2987c9f36531"></script></body>
 </html>
